@@ -111,7 +111,7 @@ def MakeFCFS_UI():
     QueueDict[temp[1]]=temp[0]+":"+temp[2] #{('order' : 'name:burst')}
     
     
-  TimeLine=FCFS(QueueDict) #['Start-End:ProcessName','Start-End:ProcessName']
+  TimeLine=FCFS(QueueDict) #list of processes ['Start-End:ProcessName','Start-End:ProcessName']
   
 
 
@@ -129,17 +129,30 @@ def MakeFCFS_UI():
   gnt.set_yticklabels([''])
   gnt.grid(True) 
 
-  MaxTime=TimeLine[-1].split(":")[0].split('-')[1] #ending time of last process 
-  gnt.set_xlim(0, MaxTime) 
+  MaxTime=int(TimeLine[-1].split(":")[0].split('-')[1]) #ending time of last process 
+  #gnt.set_xlim(0, MaxTime)
 
+  terminators=list()
+  for process in TimeLine:
+    terminators.append(int(process.split('-')[0]))
 
-  gnt.set_xticks([50])
+  terminators.append(MaxTime)  
+  gnt.set_xticks(terminators)
+
+  PreviousEnd=0
+  for process in TimeLine:
+    ProcessStart=int(process.split('-')[0])
+    ProcessEnd=int(process.split(":")[0].split('-')[1])
+    processname=process.split(':')[1]
+    gnt.text(PreviousEnd+(ProcessEnd-ProcessStart)/2,0.5 ,processname, fontsize=10)
+    PreviousEnd=ProcessEnd
+    
   
-  gnt.broken_barh([(0, 50), (50, 20)], (0.25, 0.5),facecolors =('tab:blue'))
+  gnt.broken_barh([(0,MaxTime)], (0.25, 0.5),facecolors =('tab:blue'))
+
   
-  gnt.broken_barh([(90,10)], (0.25, 0.5),facecolors =('tab:blue'))
   
-  gnt.text(1,1,"sssss", fontsize=12)
+  #gnt.text(0.5,0.5 ,"sssss", fontsize=12)
 
   plt.show()
   plt.savefig("gantt1.png")
