@@ -21,20 +21,24 @@ def space(word,numofspaces):
 
 def FCFS(Queue): #{('order' : 'name:burst')}
   
-   order=1
-   CurrentTime=0
+   order=sorted(Queue.keys())
+   CurrentTime=int(order[0])
    TimeList=list()
-   for ProcessOrder in Queue: #ProcessOrder==keys of Queue
+   for ProcessOrder in order: #ProcessOrder==keys of Queue
      
-     ProcessName=Queue[str(order)].split(':')[0]
-     BurstTime=Queue[str(order)].split(':')[1]
+     ProcessName=Queue[str(ProcessOrder)].split(':')[0]
+     BurstTime=Queue[str(ProcessOrder)].split(':')[1]
      
      StartTime=CurrentTime
      FinishTime=CurrentTime+int(BurstTime)
-     
+
+     if (int(ProcessOrder)>(CurrentTime)):
+       StartTime=int(ProcessOrder)
+       FinishTime=StartTime+int(BurstTime)
+
+       
      TimeList.append(str(StartTime)+'-'+str(FinishTime)+":"+ProcessName)
      
-     order=order+1
      CurrentTime=CurrentTime+int(BurstTime)
 
    return TimeList   #['Start-End:ProcessName','Start-End:ProcessName']
@@ -114,8 +118,6 @@ def MakeFCFS_UI():
   TimeLine=FCFS(QueueDict) #list of processes ['Start-End:ProcessName','Start-End:ProcessName']
   
 
-
-
   fig, gnt = plt.subplots(figsize=(8,4))
   
 # Setting Y-axis limits 
@@ -135,20 +137,26 @@ def MakeFCFS_UI():
   terminators=list()
   for process in TimeLine:
     terminators.append(int(process.split('-')[0]))
+    terminators.append(int(process.split(":")[0].split('-')[1]))
 
   terminators.append(MaxTime)  
   gnt.set_xticks(terminators)
 
-  PreviousEnd=0
+  
   for process in TimeLine:
     ProcessStart=int(process.split('-')[0])
     ProcessEnd=int(process.split(":")[0].split('-')[1])
     processname=process.split(':')[1]
-    gnt.text(PreviousEnd+(ProcessEnd-ProcessStart)/2,0.5 ,processname, fontsize=10)
-    PreviousEnd=ProcessEnd
+
+    size=(25/len(processname))
+    gnt.text(ProcessStart+(ProcessEnd-ProcessStart)/(2+size/50),0.5 ,processname, fontsize=size)
+
+    ProcessDuration=ProcessEnd-ProcessStart
+    gnt.broken_barh([(ProcessStart,ProcessDuration)], (0.25, 0.5),facecolors =('tab:blue'))
+    
     
   
-  gnt.broken_barh([(0,MaxTime)], (0.25, 0.5),facecolors =('tab:blue'))
+  
 
   
   
@@ -287,4 +295,13 @@ except:
   ShowError("Unexpected Error Happened")
 
 
+'''receipt=Receipt()
+receipt.AddItem("mon",12,14)
+receipt.AddItem("ahmed",10,20)
+receipt.AddItem("_",3,2)
+receipt.printrec()
+receipt.CalcSum()
 
+for key,value in Receipt.items.items():
+    print (key[0])'''
+        
