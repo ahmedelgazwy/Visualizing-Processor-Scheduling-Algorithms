@@ -289,24 +289,6 @@ def MakeRR():
 ####################################
 ##############_SJF_#################
 ####################################
-def sjf_non_prem(process_d):
- 
-    dic_2 = process_d
-    graph = []
-    times = dic_2.values()
- 
-    times=sorted(times)
-    k = 0
-    curr_time = 0
-    for i in times:
-        for j in dic_2:
-           if i == dic_2[j]:
-               graph.append(str(curr_time)+'-'+str(curr_time+i)+':'+str(j))
-               curr_time=curr_time+i
- 
-    return graph
-######################################
-######################################
 def MakeSJFUI():
     DestroyAll()
     global ButtonNonPreem,ButtonPreem
@@ -318,6 +300,8 @@ def MakeSJFUI():
     ButtonPreem = Button(GUI, text ="Preemptive",font=("Arial", 14),command = lambda : AddToQueueUI_RR(entry1.get(),entry2.get()))
     ButtonPreem.configure(height=1,width=15)
     ButtonPreem.place(x=500,y=120)
+
+    
 ######################################
 ######################################
 def SJFnonUI():
@@ -333,62 +317,111 @@ def SJFnonUI():
     ButtonPreem.configure(height=1,width=15)
     ButtonPreem.place(x=500,y=120)
 
-
-    label1= Label(GUI,text="Enter Process Name: ",bg="LightBlue",fg="white",font=("Times", 16),width=17,relief="ridge")
+    #######################################
+    label1= Label(GUI,text="Enter Process Name:",bg="LightBlue",fg="white",font=("Times", 16),width=17,relief="ridge")
     label1.place(x=10,y=200)
     
     entry1=Entry(GUI , font=("Times", 16),width=15)
-    entry1.place(x=20,y=240)
+    entry1.place(x=30,y=240)
     #######################################
     
-    label2= Label(GUI,text="Enter Burst Time:  ",bg="LightBlue",fg="white",font=("Times", 16),width=17,relief="ridge")
+    label2= Label(GUI,text="Enter Arrival Time:",bg="LightBlue",fg="white",font=("Times", 16),width=17,relief="ridge")
     label2.place(x=250,y=200)
   
     entry2=Entry(GUI , font=("Times", 16),width=15)
     entry2.place(x=270,y=240)
-    #######################################
-       
-    ButtonAddToQueue = Button(GUI, text ="Add Process",font=("Arial", 14),command = lambda : AddToQueueUI_RR(entry1.get(),entry2.get()))
-    ButtonAddToQueue.configure(height=1,width=15)
-    ButtonAddToQueue.place(x=270,y=280)
+    ######################################
+
+    label3= Label(GUI,text="Enter Burst Time:",bg="LightBlue",fg="white",font=("Times", 16),width=17,relief="ridge")
+    label3.place(x=490,y=200)
+  
+    entry3=Entry(GUI , font=("Times", 16),width=15)
+    entry3.place(x=510,y=240)
+     
     #######################################
     
+    
+    ButtonAddToQueue = Button(GUI, text ="Add Process",font=("Arial", 14),command = lambda : AddToQueueUI(entry1.get(),entry2.get(),entry3.get()))
+    ButtonAddToQueue.configure(height=1,width=15)
+    ButtonAddToQueue.place(x=270,y=280)    
+
+    ######################################
     ButtonMakeSchedule = Button(GUI, text ="Draw Schedule",font=("Arial", 20),command = lambda : MakeSJF_non())
     ButtonMakeSchedule.configure(height=1,width=20)
     ButtonMakeSchedule.place(x=200,y=330)
     #####################################
-    QueueContents = Text(GUI, height=20, width=25)
-    
-    QueueContents.insert(END,"Process          "+"Burst\n" )
-    QueueContents.insert(END,"------------------------\n" )
+    QueueContents = Text(GUI, height=20, width=35)
+    QueueContents.insert(END,"Process      "+"Arrival Time    "+"Burst\n" )
+    QueueContents.insert(END,"-----------------------------------\n" )
 
-####################################
+       
+######################################
+######################################
+def sjf_non_prem(process_d,process_a):
+ 
+    Burst = process_d
+    Arrival=process_a
+    readyqueue=[]
+    graph = []
     
-def AddToQueueUI_RR(ProcessName,BurstTime): # make initial look of queue contents (name:burst)
-  entry1.delete(0, 'end')
-  entry2.delete(0, 'end')
-  
+    ArrivalSorted=dict()
+    BurstSorted=dict()    
 
-  QueueContents.place(x=900,y=120)
+    for key, value in sorted(Arrival.items(), key=lambda item: item[1]):
+      ArrivalSorted[key]=float(value)
+
+    for key, value in sorted(Burst.items(), key=lambda item: item[1]):
+      BurstSorted[key]=float(value) 
+
+       
+    curr_time = float(list(ArrivalSorted.values())[0])
+
+    flag=1
+    while flag == 1:
+     flag=0
+     
+     for i in BurstSorted:
+                
+         if (ArrivalSorted[i]!="done"):
+            if (ArrivalSorted[i]<=curr_time) and (i not in readyqueue):
+               readyqueue.append(i)
+               
+            if (ArrivalSorted[i]>curr_time) and (len(readyqueue)==0) and (curr_time>0) : # for gap
+               curr_time=float(ArrivalSorted[i])
+               readyqueue.append(i)     
+                
+         if (i in readyqueue):
+                graph.append(str(curr_time)+'-'+str(curr_time+BurstSorted[i])+':'+str(i))
+                ArrivalSorted[i]="done"
+                readyqueue.remove(i)
+                curr_time=curr_time+BurstSorted[i]
+                
+         for i in ArrivalSorted:
+            if ArrivalSorted[i] != "done":
+                flag =1
+                break
+    return graph
   
-  QueueContents.insert(END, ProcessName+space(ProcessName,18)+BurstTime+"\n")    
 ######################################
 ######################################
 def MakeSJF_non():
   QueueList=QueueContents.get("3.0",END).split("\n")[:-2]
-  QueueDict=dict()
-
+  Process_Arrival=dict()
+  Process_Burst=dict()
+  
   for process in QueueList: #construct Dictionary of queue
     temp=process.split()
-    QueueDict[temp[0]]=float(temp[1]) #{('name' : 'burst')}
+    Process_Arrival[temp[0]]=float(temp[1]) #{('name' : 'Arrival')}
+    Process_Burst[temp[0]]=float(temp[2])
     
   
-  timeline=sjf_non_prem(QueueDict) #timeline=list of processes ['Start-End:ProcessName','Start-End:ProcessName']
+  timeline=sjf_non_prem(Process_Burst,Process_Arrival) #timeline=list of processes ['Start-End:ProcessName','Start-End:ProcessName']
   DrawGantt(timeline)
 
 
 
-
+######################################
+######################################
 def main():
  try:
    AdminGui.destroy()
