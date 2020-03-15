@@ -2,8 +2,6 @@ from tkinter import *
 from tkinter import messagebox
 import matplotlib.pyplot as plt 
 
-
-
 ####################################
 ########_USEFUL_FUNCTIONS_##########
 #################################### 
@@ -18,11 +16,63 @@ def space(word,numofspaces):
    for i in range (0,numofspaces-len(word)):
      space = space + " "
    return space
+  
+def DrawGantt(TimeLine):
+  fig, gnt = plt.subplots(figsize=(8,4))
+  
+# Setting Y-axis limits 
+  gnt.set_ylim(0, 1) 
+   
+# Setting X-axis limits 
+  gnt.set_xlabel('Time',fontsize=16)   
+# Setting ticks on y-axis 
+  gnt.set_yticks([0.5]) 
+# Labelling tickes of y-axis 
+  gnt.set_yticklabels([''])
+  gnt.grid(True) 
 
+  MaxTime=float(TimeLine[-1].split(":")[0].split('-')[1]) #ending time of last process 
+  #gnt.set_xlim(0, MaxTime)
+
+  terminators=list()
+  for process in TimeLine:
+    terminators.append(float(process.split('-')[0]))
+    terminators.append(float(process.split(":")[0].split('-')[1]))
+
+  terminators.append(MaxTime)  
+  gnt.set_xticks(terminators)
+
+  
+  for process in TimeLine:
+    ProcessStart=float(process.split('-')[0])
+    ProcessEnd=float(process.split(":")[0].split('-')[1])
+    processname=process.split(':')[1]
+
+    size=(25/len(processname))
+    gnt.text(ProcessStart+(ProcessEnd-ProcessStart)/(2+size/50),0.5 ,processname, fontsize=size)
+
+    ProcessDuration=ProcessEnd-ProcessStart
+    gnt.broken_barh([(ProcessStart,ProcessDuration)], (0.25, 0.5),facecolor ='#add8e6')
+    
+  
+  #gnt.text(0.5,0.5 ,"sssss", fontsize=12)
+  plt.savefig("gantt1.png")
+
+  plt.show()
+  
+  #img = PhotoImage(file="gantt1.png").zoom(2).subsample(3)
+  '''label=Label(image=img)
+  label.image=img
+  label.place(x=300,y=320 )'''
+
+  
+####################################
+###############_FCFS_###############
+#################################### 
 def FCFS(Queue): #{('order' : 'name:burst')}
   
    order=sorted(Queue.keys())
-   CurrentTime=int(order[0])
+   CurrentTime=float(order[0])
    TimeList=list()
    for ProcessOrder in order: #ProcessOrder==keys of Queue
      
@@ -30,24 +80,20 @@ def FCFS(Queue): #{('order' : 'name:burst')}
      BurstTime=Queue[str(ProcessOrder)].split(':')[1]
      
      StartTime=CurrentTime
-     FinishTime=CurrentTime+int(BurstTime)
+     FinishTime=CurrentTime+float(BurstTime)
 
-     if (int(ProcessOrder)>(CurrentTime)):
-       StartTime=int(ProcessOrder)
-       FinishTime=StartTime+int(BurstTime)
+     if (float(ProcessOrder)>(CurrentTime)):
+       StartTime=float(ProcessOrder)
+       FinishTime=StartTime+float(BurstTime)
 
        
      TimeList.append(str(StartTime)+'-'+str(FinishTime)+":"+ProcessName)
      
-     CurrentTime=CurrentTime+int(BurstTime)
+     CurrentTime=CurrentTime+float(BurstTime)
 
    return TimeList   #['Start-End:ProcessName','Start-End:ProcessName']
      
-  
-  
-
 ####################################أ
-############_Receipt_###############
 #################################### 
 def MakeFcfsUI():
     DestroyAll()
@@ -59,13 +105,11 @@ def MakeFcfsUI():
     entry1.place(x=20,y=160)
     #######################################
     
-    label2= Label(GUI,text="Enter Process Order: : ",bg="LightBlue",fg="white",font=("Times", 16),width=17,relief="ridge")
+    label2= Label(GUI,text="Enter Arrival Time:  ",bg="LightBlue",fg="white",font=("Times", 16),width=17,relief="ridge")
     label2.place(x=250,y=120)
   
     entry2=Entry(GUI , font=("Times", 16),width=15)
     entry2.place(x=270,y=160)
-    #######################################
-
     #######################################
     
     label3= Label(GUI,text="Enter Burst Time: : ",bg="LightBlue",fg="white",font=("Times", 16),width=17,relief="ridge")
@@ -74,28 +118,24 @@ def MakeFcfsUI():
     entry3=Entry(GUI , font=("Times", 16),width=15)
     entry3.place(x=510,y=160)
 
-    
      
     #######################################
     ButtonAddToQueue = Button(GUI, text ="Add Process",font=("Arial", 14),command = lambda : AddToQueueUI(entry1.get(),entry2.get(),entry3.get()))
     ButtonAddToQueue.configure(height=1,width=15)
     ButtonAddToQueue.place(x=270,y=200)
     #######################################
-    
 
-
-    ######################################
-    ButtonMakeSchedule = Button(GUI, text ="Draw Schedule",font=("Arial", 20),command = lambda : MakeFCFS_UI())
+    ButtonMakeSchedule = Button(GUI, text ="Draw Schedule",font=("Arial", 20),command = lambda : MakeFCFS())
     ButtonMakeSchedule.configure(height=1,width=20)
     ButtonMakeSchedule.place(x=200,y=250)
     #####################################
-    QueueContents = Text(GUI, height=20, width=30)
-    QueueContents.insert(END,"Process        "+"Order    "+"Burst\n" )
-    QueueContents.insert(END,"------------------------------\n" )
+    QueueContents = Text(GUI, height=20, width=35)
+    QueueContents.insert(END,"Process      "+"Arrival Time    "+"Burst\n" )
+    QueueContents.insert(END,"-----------------------------------\n" )
 
 
 
-def AddToQueueUI(MedName,Quantity,BurstTime): # make initial look of receipt contents
+def AddToQueueUI(ProcessName,Arrival,BurstTime): # make initial look of queue contents (name:arrival:burst)
   entry1.delete(0, 'end')
   entry2.delete(0, 'end')
   entry3.delete(0, 'end')
@@ -103,10 +143,11 @@ def AddToQueueUI(MedName,Quantity,BurstTime): # make initial look of receipt con
 
   QueueContents.place(x=900,y=120)
   
-  QueueContents.insert(END, MedName+space(MedName,17)+Quantity+space(Quantity,7)+BurstTime+"\n")
+  QueueContents.insert(END, ProcessName+space(ProcessName,18)+Arrival+space(Arrival,12)+BurstTime+"\n")
 
 
-def MakeFCFS_UI():
+
+def MakeFCFS():
   QueueList=QueueContents.get("3.0",END).split("\n")[:-2]
   QueueDict=dict()
 
@@ -115,64 +156,235 @@ def MakeFCFS_UI():
     QueueDict[temp[1]]=temp[0]+":"+temp[2] #{('order' : 'name:burst')}
     
     
-  TimeLine=FCFS(QueueDict) #list of processes ['Start-End:ProcessName','Start-End:ProcessName']
-  
-
-  fig, gnt = plt.subplots(figsize=(8,4))
-  
-# Setting Y-axis limits 
-  gnt.set_ylim(0, 1) 
-   
-# Setting X-axis limits 
-  gnt.set_xlabel('seconds')   
-# Setting ticks on y-axis 
-  gnt.set_yticks([0.5]) 
-# Labelling tickes of y-axis 
-  gnt.set_yticklabels([''])
-  gnt.grid(True) 
-
-  MaxTime=int(TimeLine[-1].split(":")[0].split('-')[1]) #ending time of last process 
-  #gnt.set_xlim(0, MaxTime)
-
-  terminators=list()
-  for process in TimeLine:
-    terminators.append(int(process.split('-')[0]))
-    terminators.append(int(process.split(":")[0].split('-')[1]))
-
-  terminators.append(MaxTime)  
-  gnt.set_xticks(terminators)
-
-  
-  for process in TimeLine:
-    ProcessStart=int(process.split('-')[0])
-    ProcessEnd=int(process.split(":")[0].split('-')[1])
-    processname=process.split(':')[1]
-
-    size=(25/len(processname))
-    gnt.text(ProcessStart+(ProcessEnd-ProcessStart)/(2+size/50),0.5 ,processname, fontsize=size)
-
-    ProcessDuration=ProcessEnd-ProcessStart
-    gnt.broken_barh([(ProcessStart,ProcessDuration)], (0.25, 0.5),facecolors =('tab:blue'))
-    
-    
-  
-  
-
-  
-  
-  #gnt.text(0.5,0.5 ,"sssss", fontsize=12)
-
-  plt.show()
-  plt.savefig("gantt1.png")
+  timeline=FCFS(QueueDict) #list of processes ['Start-End:ProcessName','Start-End:ProcessName']
+  DrawGantt(timeline)
 
 
 
 
+####################################أ
+####################################
+def round_robin(process_d,process_a,t_s):
+    Burst = process_d #Burst
+    Arrival =  process_a #Arrival
+    readyqueue=[]
+    ArrivalSorted=dict()
+
+    for key, value in sorted(Arrival.items(), key=lambda item: item[1]):
+      ArrivalSorted[key]=value
+
+
+    graph = []
+    flag=1
+
+    curr_time=float(list(ArrivalSorted.values())[0])
+
+
+    while flag == 1:
+        flag=0
+
+        for i in ArrivalSorted:
+                  
+         if(ArrivalSorted[i]!="done"):
+            if (ArrivalSorted[i]<=curr_time) and (i not in readyqueue):
+               readyqueue.append(i)
+
+               
+            if(ArrivalSorted[i]>curr_time) and (len(readyqueue)==0) and (curr_time>0) : # for gap
+               curr_time=float(ArrivalSorted[i])
+               readyqueue.append(i)
+
+           
+         if(i in readyqueue):
+            if (Burst[i] >= t_s ):
  
+                graph.append(str(curr_time) + '-' + str(t_s+curr_time)+':'+str(i))
+                Burst[i] = Burst[i]-t_s
+                curr_time = curr_time+t_s
+ 
+ 
+            elif (Burst[i] < t_s) and (Burst[i] > 0):
+                graph.append(str(curr_time) + '-' + str(Burst[i]+curr_time)+':'+str(i))
+                curr_time=curr_time+Burst[i]
+                Burst[i] = 0
+                
+            if (Burst[i]==0):
+                ArrivalSorted[i]="done"
+                readyqueue.remove(i)
+ 
+        for i in Burst:
+            if Burst[i] != 0:
+                flag =1
+                break
+    return graph
+  
+def MakeRRUI():
+    DestroyAll()
+    global label1,entry1,ButtonAddToQueue, label2,entry2,ButtonMakeSchedule,QueueContents,label3,entry3,label4,entry4
+    label1= Label(GUI,text="Enter Process Name:",bg="LightBlue",fg="white",font=("Times", 16),width=17,relief="ridge")
+    label1.place(x=10,y=200)
+    
+    entry1=Entry(GUI , font=("Times", 16),width=15)
+    entry1.place(x=30,y=240)
+    #######################################
+    
+    label2= Label(GUI,text="Enter Arrival Time:",bg="LightBlue",fg="white",font=("Times", 16),width=17,relief="ridge")
+    label2.place(x=250,y=200)
+  
+    entry2=Entry(GUI , font=("Times", 16),width=15)
+    entry2.place(x=270,y=240)
+    ######################################
+
+    label3= Label(GUI,text="Enter Burst Time:",bg="LightBlue",fg="white",font=("Times", 16),width=17,relief="ridge")
+    label3.place(x=490,y=200)
+  
+    entry3=Entry(GUI , font=("Times", 16),width=15)
+    entry3.place(x=510,y=240)
+     
+    #######################################
+    
+    label4= Label(GUI,text="Enter Time Quantum:",bg="LightBlue",fg="white",font=("Times", 16),width=17,relief="ridge")
+    label4.place(x=250,y=120)
+  
+    entry4=Entry(GUI , font=("Times", 16),width=15)
+    entry4.place(x=270,y=160)
+    ########################################
+    
+    ButtonAddToQueue = Button(GUI, text ="Add Process",font=("Arial", 14),command = lambda : AddToQueueUI(entry1.get(),entry2.get(),entry3.get()))
+    ButtonAddToQueue.configure(height=1,width=15)
+    ButtonAddToQueue.place(x=270,y=280)    
+
+    ######################################
+    ButtonMakeSchedule = Button(GUI, text ="Draw Schedule",font=("Arial", 20),command = lambda : MakeRR())
+    ButtonMakeSchedule.configure(height=1,width=20)
+    ButtonMakeSchedule.place(x=200,y=330)
+    #####################################
+    QueueContents = Text(GUI, height=20, width=35)
+    QueueContents.insert(END,"Process      "+"Arrival Time    "+"Burst\n" )
+    QueueContents.insert(END,"-----------------------------------\n" )
 
 
 ####################################
+
+def MakeRR():
+  QueueList=QueueContents.get("3.0",END).split("\n")[:-2]
+  Process_Arrival=dict()
+  Process_Burst=dict()
+  
+
+  for process in QueueList: #construct Dictionary of queue
+    temp=process.split()
+    Process_Arrival[temp[0]]=float(temp[1]) #{('name' : 'Arrival')}
+    Process_Burst[temp[0]]=float(temp[2])
+    
+    
+  TimeQuantum=float(entry4.get())
+  
+  timeline=round_robin(Process_Burst,Process_Arrival,TimeQuantum) #timeline=list of processes ['Start-End:ProcessName','Start-End:ProcessName']
+  
+  DrawGantt(timeline)
+
+  
+
 ####################################
+##############_SJF_#################
+####################################
+def sjf_non_prem(process_d):
+ 
+    dic_2 = process_d
+    graph = []
+    times = dic_2.values()
+ 
+    times=sorted(times)
+    k = 0
+    curr_time = 0
+    for i in times:
+        for j in dic_2:
+           if i == dic_2[j]:
+               graph.append(str(curr_time)+'-'+str(curr_time+i)+':'+str(j))
+               curr_time=curr_time+i
+ 
+    return graph
+######################################
+######################################
+def MakeSJFUI():
+    DestroyAll()
+    global ButtonNonPreem,ButtonPreem
+
+    ButtonNonPreem = Button(GUI, text ="Non Preemptive",font=("Arial", 14),command = lambda : SJFnonUI())
+    ButtonNonPreem.configure(height=1,width=15)
+    ButtonNonPreem.place(x=300,y=120)
+
+    ButtonPreem = Button(GUI, text ="Preemptive",font=("Arial", 14),command = lambda : AddToQueueUI_RR(entry1.get(),entry2.get()))
+    ButtonPreem.configure(height=1,width=15)
+    ButtonPreem.place(x=500,y=120)
+######################################
+######################################
+def SJFnonUI():
+    DestroyAll()
+    global label1,entry1,ButtonAddToQueue, label2,entry2,ButtonMakeSchedule,QueueContents,label3,entry3
+    global ButtonNonPreem,ButtonPreem
+    
+    ButtonNonPreem = Button(GUI, text ="Non Preemptive",font=("Arial", 14),command = lambda : SJFnonUI())
+    ButtonNonPreem.configure(height=1,width=15)
+    ButtonNonPreem.place(x=300,y=120)
+
+    ButtonPreem = Button(GUI, text ="Preemptive",font=("Arial", 14),command = lambda : AddToQueueUI_RR(entry1.get(),entry2.get()))
+    ButtonPreem.configure(height=1,width=15)
+    ButtonPreem.place(x=500,y=120)
+
+
+    label1= Label(GUI,text="Enter Process Name: ",bg="LightBlue",fg="white",font=("Times", 16),width=17,relief="ridge")
+    label1.place(x=10,y=200)
+    
+    entry1=Entry(GUI , font=("Times", 16),width=15)
+    entry1.place(x=20,y=240)
+    #######################################
+    
+    label2= Label(GUI,text="Enter Burst Time:  ",bg="LightBlue",fg="white",font=("Times", 16),width=17,relief="ridge")
+    label2.place(x=250,y=200)
+  
+    entry2=Entry(GUI , font=("Times", 16),width=15)
+    entry2.place(x=270,y=240)
+    #######################################
+       
+    ButtonAddToQueue = Button(GUI, text ="Add Process",font=("Arial", 14),command = lambda : AddToQueueUI_RR(entry1.get(),entry2.get()))
+    ButtonAddToQueue.configure(height=1,width=15)
+    ButtonAddToQueue.place(x=270,y=280)
+    #######################################
+    
+    ButtonMakeSchedule = Button(GUI, text ="Draw Schedule",font=("Arial", 20),command = lambda : MakeSJF_non())
+    ButtonMakeSchedule.configure(height=1,width=20)
+    ButtonMakeSchedule.place(x=200,y=330)
+    #####################################
+    QueueContents = Text(GUI, height=20, width=25)
+    
+    QueueContents.insert(END,"Process          "+"Burst\n" )
+    QueueContents.insert(END,"------------------------\n" )
+
+####################################
+    
+def AddToQueueUI_RR(ProcessName,BurstTime): # make initial look of queue contents (name:burst)
+  entry1.delete(0, 'end')
+  entry2.delete(0, 'end')
+  
+
+  QueueContents.place(x=900,y=120)
+  
+  QueueContents.insert(END, ProcessName+space(ProcessName,18)+BurstTime+"\n")    
+######################################
+######################################
+def MakeSJF_non():
+  QueueList=QueueContents.get("3.0",END).split("\n")[:-2]
+  QueueDict=dict()
+
+  for process in QueueList: #construct Dictionary of queue
+    temp=process.split()
+    QueueDict[temp[0]]=float(temp[1]) #{('name' : 'burst')}
+    
+  
+  timeline=sjf_non_prem(QueueDict) #timeline=list of processes ['Start-End:ProcessName','Start-End:ProcessName']
+  DrawGantt(timeline)
 
 
 
@@ -214,11 +426,11 @@ def main():
  B0.configure(height=2,width=16)
  B0.grid(row=1,column=0)
 
- B1 = Button(GUI, text ="SJF",font=("Arial", 15), command =lambda :  MakeFcfsUI())
+ B1 = Button(GUI, text ="SJF",font=("Arial", 15), command =lambda :  MakeSJFUI())
  B1.configure(height=2,width=17)
  B1.grid(row=1,column=1)
 
- B2 = Button(GUI, text ="Round Robin",font=("Arial", 15), command =lambda :  MakeFcfsUI())
+ B2 = Button(GUI, text ="Round Robin",font=("Arial", 15), command =lambda :  MakeRRUI())
  B2.configure(height=2,width=16)
  B2.grid(row=1,column=2)
 
@@ -232,8 +444,6 @@ def main():
  GUI.mainloop()
  
  
-
-
 
 
 ####################################
@@ -255,21 +465,21 @@ def DestroyAll(): # make sure that area we use is clear before placing objects
         label2.destroy()
         entry2.destroy()
         ButtonMakeSchedule.destroy()
-        buttoncash.destroy()
-        buttonvisa.destroy()
-        labelPaymentType.destroy()
         QueueContents.destroy()
-        labelOrderType.destroy()
-        buttonstore.destroy()
-        buttondelivery.destroy()
-        labelClientID.destroy()
-        entryClientID.destroy()
-        labelAddress.destroy()
-        EntryAddress.destroy()
-
+        label3.destroy()
+        entry3.destroy()
+        label4.destroy()
+        entry4.destroy()
+  except:
+         pass
+  try:  
+     ButtonNonPreem.destroy()
+     ButtonPreem.destroy()
+     
   except:
          pass
 
+        
   
 class FullScreenApp(object):
     def __init__(self, master, **kwargs):
