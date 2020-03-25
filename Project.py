@@ -26,6 +26,13 @@ def space(word,numofspaces):
      space = space + " "
    return space
 #####################################
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+#####################################      
 def min_a(arr,num):
  try:
     minx=arr[0]
@@ -207,6 +214,15 @@ def AddToQueueUI(ProcessName,Arrival,BurstTime): # make initial look of queue co
   if(ProcessName=='' or Arrival=='' or BurstTime==''):
              ShowError("Please Fill All Fields!")
              error=1
+
+  if(is_number(Arrival)==0  and Arrival!=''):
+                  ShowError("Arrival Must Be Numeric!")
+                  error=1
+                  
+  if(is_number(BurstTime)==0 and BurstTime!=''):
+                  ShowError("Burst Must Be Numeric!")
+                  error=1
+                  
   if(error==0):           
     QueueContents.place(x=900,y=120)
     QueueContents.insert(END, ProcessName+space(ProcessName,18)+Arrival+space(Arrival,12)+BurstTime+"\n")
@@ -618,7 +634,19 @@ def AddToQueueUI_Prio(ProcessName,BurstTime,Arrival,Priority): # make initial lo
   if(ProcessName=='' or Arrival=='' or BurstTime=='' or Priority==''):
              ShowError("Please Fill All Fields!")
              error=1
-  
+
+  if(is_number(Arrival)==0  and Arrival!=''):
+                  ShowError("Arrival Must Be Numeric!")
+                  error=1
+                  
+  if(is_number(BurstTIme)==0 and BurstTime!=''):
+                  ShowError("Burst Must Be Numeric!")
+                  error=1
+                  
+  if(is_number(Priority)==0  and Priority!=''):
+                  ShowError("Priority Must Be Numeric!")
+                  error=1
+               
   if(error==0):
      QueueContents.place(x=850,y=120)
      QueueContents.insert(END, ProcessName+space(ProcessName,18)+Arrival+space(Arrival,11)+BurstTime+space(BurstTime,11)+Priority+"\n")
@@ -871,6 +899,6 @@ class FullScreenApp(object):
 try:  
  main()
 except:
-  ShowError("Unexpected Error Happened")
+  ShowError("Error Happened, Please Check Your Inputs!")
 
 
