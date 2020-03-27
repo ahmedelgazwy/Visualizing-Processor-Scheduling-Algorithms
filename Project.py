@@ -639,7 +639,7 @@ def AddToQueueUI_Prio(ProcessName,BurstTime,Arrival,Priority): # make initial lo
                   ShowError("Arrival Must Be Numeric!")
                   error=1
                   
-  if(is_number(BurstTIme)==0 and BurstTime!=''):
+  if(is_number(BurstTime)==0 and BurstTime!=''):
                   ShowError("Burst Must Be Numeric!")
                   error=1
                   
@@ -900,5 +900,3 @@ try:
  main()
 except:
   ShowError("Error Happened, Please Check Your Inputs!")
-
-
