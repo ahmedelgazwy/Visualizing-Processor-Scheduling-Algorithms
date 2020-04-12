@@ -140,8 +140,10 @@ def ShowWaitingTime(AvgWaiting):
 #############_FCFS_#################
 #################################### 
 def FCFS(Queue): #{('order' : 'name:burst')}
-  
+
+   print (Queue.keys())
    order=sorted(Queue.keys())
+   print(order)
    CurrentTime=float(order[0])
    TimeList=list()
    for ProcessOrder in order: #ProcessOrder==keys of Queue
@@ -487,29 +489,40 @@ def sjf_non_prem(process_d,process_a):
     curr_time = float(list(ArrivalSorted.values())[0])
 
     flag=1
+    print (BurstSorted)
     while flag == 1:
      flag=0
-     
-     for i in BurstSorted:
-                
-         if (ArrivalSorted[i]!="done"):
+
+     for i in BurstSorted: #loop over all process and add to readyqueue the ready processes
+        if (ArrivalSorted[i]!="done"):
             if (ArrivalSorted[i]<=curr_time) and (i not in readyqueue):
-               readyqueue.append(i)
-               
-            if (ArrivalSorted[i]>curr_time) and (len(readyqueue)==0) and (curr_time>0) : # for gap
-               curr_time=float(ArrivalSorted[i])
-               readyqueue.append(i)     
-                
-         if (i in readyqueue):
+              readyqueue.append(i)
+
+     if (len(readyqueue)==0) and (curr_time>0) : # for gap, make current_time= closest arrival time of process,so in next while iteration we can append to readyqueue
+            for i in ArrivalSorted:
+              if(ArrivalSorted[i]!="done"):
+                   curr_time=float(ArrivalSorted[i])                                   
+
+                       
+     for i in BurstSorted: #loop over process sorted with burst times so we choose smallest burst that is also in readyqueue
+
+         
+         for x in ArrivalSorted:  #check if some still not done
+                   if ArrivalSorted[x] != "done":
+                     flag=1
+                     break
+                     
+         
+         if (i in readyqueue and ArrivalSorted[i]!="done"):
                 graph.append(str(curr_time)+'-'+str(curr_time+BurstSorted[i])+':'+str(i))
                 ArrivalSorted[i]="done"
                 readyqueue.remove(i)
                 curr_time=curr_time+BurstSorted[i]
-                
-         for i in ArrivalSorted:
-            if ArrivalSorted[i] != "done":
-                flag =1
                 break
+              
+                
+                
+
     return graph
   
 ######################################
@@ -710,16 +723,24 @@ def prio_nonprem(process_d,process_t,process_p):
     flag=1
     while flag == 1:
      flag=0
+
+     for i in PrioritySorted: #loop over all process and add to readyqueue the ready processes
+        if (ArrivalSorted[i]!="done"):
+            if (ArrivalSorted[i]<=curr_time) and (i not in readyqueue):
+              readyqueue.append(i)
+
+     if (len(readyqueue)==0) and (curr_time>0) : # for gap, make current_time= closest arrival time of process,so in next while iteration we can append to readyqueue
+            for i in ArrivalSorted:
+              if(ArrivalSorted[i]!="done"):
+                   curr_time=float(ArrivalSorted[i])  
      
      for i in PrioritySorted:
+
+         for x in ArrivalSorted:
+            if ArrivalSorted[x] != "done":
+                flag =1
+                break
                 
-         if (ArrivalSorted[i]!="done"):
-              if (ArrivalSorted[i]<=curr_time) and (i not in readyqueue):
-                 readyqueue.append(i)
-               
-              if (ArrivalSorted[i]>curr_time) and (len(readyqueue)==0) and (curr_time>0) : # for gap
-                 curr_time=float(ArrivalSorted[i])
-                 readyqueue.append(i)     
                 
          if (i in readyqueue):
                 TimeList.append(str(curr_time)+'-'+str(curr_time+Burst[i])+':'+str(i))
@@ -727,10 +748,7 @@ def prio_nonprem(process_d,process_t,process_p):
                 readyqueue.remove(i)
                 curr_time=curr_time+Burst[i]
                 
-         for i in ArrivalSorted:
-            if ArrivalSorted[i] != "done":
-                flag =1
-                break
+
     return TimeList
      
 ##########################################
@@ -900,3 +918,5 @@ try:
  main()
 except:
   ShowError("Error Happened, Please Check Your Inputs!")
+
+
