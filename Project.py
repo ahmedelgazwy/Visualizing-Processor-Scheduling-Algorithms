@@ -124,7 +124,8 @@ def AvgWaitingTime(Arrival,Timeline):
            Sum=Sum+waiting[process]
            
    AvgWaiting=float(Sum)/float(NumOfProcess)
-   return AvgWaiting
+   
+   return float("{:.2f}".format(AvgWaiting))
 #####################################
 def ShowWaitingTime(AvgWaiting):
      global label6
@@ -519,9 +520,7 @@ def sjf_non_prem(process_d,process_a):
                 readyqueue.remove(i)
                 curr_time=curr_time+BurstSorted[i]
                 break
-              
-                
-                
+                                
 
     return graph
   
@@ -548,27 +547,34 @@ def sjf_prem(process_d,process_t):
     i=0
     graph=[]
     curr_time=time[0]
+
     while len(val)!=0:
         x = 0
         while 1:
             flag2 = 0
             for j in range(i+1,len(time)):
  
-                if ((val[i]>val[j]) and ((val[i]+time[i])>time[j])) :
+                if ((val[i]+time[i]-time[j] ss>val[j]) and ((val[i]+time[i])>time[j])) :
                     if time[i]>curr_time:
                         curr_time=time[i]
  
                     flag2=1
+      
                     if time[j]!=curr_time:
                       graph.append(str(curr_time)+'-'+str(time[j])+':'+key[i])
                     curr_time = time[j]
+                    
                     val[i]=val[i]+time[i]-time[j]
                     i=j
                     break
+
+            
             if flag2==0:
-                if time[i]>curr_time:
+                if time[i]>curr_time: #gap
                         curr_time=time[i]
+                        
                 graph.append(str(curr_time)+'-'+str(curr_time+val[i])+':'+key[i])
+                #print(curr_time,val[i],i)
                 curr_time=curr_time+val[i];
                 val.remove(val[i])
                 key.remove(key[i])
@@ -578,6 +584,7 @@ def sjf_prem(process_d,process_t):
                         x=x+1
                 i = min_a(val,x)
                 break
+              
     return graph
 
 
