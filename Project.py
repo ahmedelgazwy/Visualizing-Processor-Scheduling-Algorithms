@@ -152,30 +152,40 @@ def ShowWaitingTime(AvgWaiting):
 ####################################
 #############_FCFS_#################
 ####################################
-def FCFS(Queue):  # {('order' : 'name:burst')}
+def FCFS(process_d, process_a):  
+    Burst = process_d.copy()  # Burst
+    Arrival = process_a.copy()  # Arrival
+    
+    ArrivalSorted = dict() #dict of Arrival Times Sorted
+    
+    for key, value in sorted(Arrival.items(), key=lambda item: item[1]):
+        ArrivalSorted[key] = value
+    
+    CurrentTime = float(list(ArrivalSorted.values())[0])
+    
+    TimeLine = list()
+    print(Burst,ArrivalSorted,CurrentTime)
+    
+    for Process in ArrivalSorted:  # Process= keys of ArrivalSorted (Process Name)
 
-    print(Queue.keys())
-    order = sorted(Queue.keys())
-    print(order)
-    CurrentTime = float(order[0])
-    TimeList = list()
-    for ProcessOrder in order:  # ProcessOrder==keys of Queue
+        
+        if (ArrivalSorted[Process] > CurrentTime): #Gap
+            CurrentTime=ArrivalSorted[Process]            
+            FinishTime = CurrentTime + Burst[Process]
+            TimeLine.append(str(CurrentTime) + '-' + str(FinishTime) + ":" + Process)            
+            
+        else:
+          FinishTime = CurrentTime + Burst[Process]
+          TimeLine.append(str(CurrentTime) + '-' + str(FinishTime) + ":" + Process)
+          CurrentTime = CurrentTime + Burst[Process]
 
-        ProcessName = Queue[str(ProcessOrder)].split(':')[0]
-        BurstTime = Queue[str(ProcessOrder)].split(':')[1]
 
-        StartTime = CurrentTime
-        FinishTime = CurrentTime + float(BurstTime)
 
-        if (float(ProcessOrder) > (CurrentTime)):
-            StartTime = float(ProcessOrder)
-            FinishTime = StartTime + float(BurstTime)
 
-        TimeList.append(str(StartTime) + '-' + str(FinishTime) + ":" + ProcessName)
 
-        CurrentTime = CurrentTime + float(BurstTime)
+        
 
-    return TimeList  # ['Start-End:ProcessName','Start-End:ProcessName']
+    return TimeLine  # ['Start-End:ProcessName','Start-End:ProcessName']
 
 
 ####################################
@@ -257,13 +267,18 @@ def MakeFCFS():
     QueueList = QueueContents.get("3.0", END).split("\n")[:-2]
     QueueDict = dict()
     Process_Arrival = dict()
+    Process_Burst = dict()
+    
 
     for process in QueueList:  # construct Dictionary of queue
         temp = process.split()
+        
         QueueDict[temp[1]] = temp[0] + ":" + temp[2]  # {('order' : 'name:burst')}
+        
         Process_Arrival[temp[0]] = float(temp[1])  # {('name' : Arrival)}
+        Process_Burst[temp[0]] = float(temp[2] )   # {('name' : Burst)}
 
-    timeline = FCFS(QueueDict)  # list of processes ['Start-End:ProcessName','Start-End:ProcessName']
+    timeline = FCFS(Process_Burst,Process_Arrival)  # list of processes ['Start-End:ProcessName','Start-End:ProcessName']
 
     AvgWaiting = AvgWaitingTime(Process_Arrival, timeline)
     ShowWaitingTime(AvgWaiting)
@@ -968,4 +983,3 @@ except:
     ShowError("Error Happened, Please Check Your Inputs!")
 
 
- 
