@@ -173,18 +173,19 @@ def FCFS(process_d, process_a):
             CurrentTime=ArrivalSorted[Process]            
             FinishTime = CurrentTime + Burst[Process]
             TimeLine.append(str(CurrentTime) + '-' + str(FinishTime) + ":" + Process)            
-            
+            CurrentTime=FinishTime           
+
         else:
           FinishTime = CurrentTime + Burst[Process]
           TimeLine.append(str(CurrentTime) + '-' + str(FinishTime) + ":" + Process)
-          CurrentTime = CurrentTime + Burst[Process]
+          CurrentTime = FinishTime
 
 
 
 
 
         
-
+    print(TimeLine)
     return TimeLine  # ['Start-End:ProcessName','Start-End:ProcessName']
 
 
