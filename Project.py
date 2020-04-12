@@ -289,39 +289,45 @@ def round_robin(process_d, process_a, t_s):
     while flag == 1:
         flag = 0
 
+        for z in ArrivalSorted:
+            if (ArrivalSorted[z] != "done" ):
+                if (ArrivalSorted[z] <= curr_time) and (z not in readyqueue):
+                    readyqueue.append(z)
+
         if (len(readyqueue) == 0) and (curr_time > 0):  # for gap, make current_time= closest arrival time of process,so in next while iteration we can append to readyqueue
             for i in ArrivalSorted:
                 if (ArrivalSorted[i] != "done"):
                     curr_time = float(ArrivalSorted[i])
 
-        for i in ArrivalSorted:
-
-            for x in Burst:
-                if Burst[x] != 0:
-                    flag = 1
-                    break
-            for z in ArrivalSorted:
-                if (ArrivalSorted[z] != "done"):
-                    if (ArrivalSorted[z] <= curr_time) and (z not in readyqueue):
-                        readyqueue.append(z)
-
-            if (i in readyqueue):
-                if (Burst[i] >= t_s):
+        print(readyqueue)
+        i=readyqueue[0]
+        if (Burst[i] >= t_s):
                     graph.append(str(curr_time) + '-' + str(t_s + curr_time) + ':' + str(i))
                     Burst[i] = Burst[i] - t_s
                     curr_time = curr_time + t_s
-                    if (Burst[i] == 0):
-                        ArrivalSorted[i] = "done"
-                        readyqueue.remove(i)
 
-                elif (Burst[i] < t_s) and (Burst[i] > 0):
+        elif (Burst[i] < t_s) and (Burst[i] > 0):
                     graph.append(str(curr_time) + '-' + str(Burst[i] + curr_time) + ':' + str(i))
                     curr_time = curr_time + Burst[i]
                     Burst[i] = 0
-                    if (Burst[i] == 0):
-                        ArrivalSorted[i] = "done"
-                        readyqueue.remove(i)
 
+        readyqueue.pop(0)
+
+        for z in ArrivalSorted:
+            if (ArrivalSorted[z] != "done" and z != i):
+                if (ArrivalSorted[z] <= curr_time) and (z not in readyqueue):
+                    readyqueue.append(z)
+
+        readyqueue.append(i)
+
+        if (Burst[i] == 0):
+                ArrivalSorted[i] = "done"
+                readyqueue.remove(i)
+
+        for x in Burst:
+                if Burst[x] != 0:
+                    flag = 1
+                    break
 
     return graph
 
@@ -960,5 +966,6 @@ try:
     main()
 except:
     ShowError("Error Happened, Please Check Your Inputs!")
+
 
 
