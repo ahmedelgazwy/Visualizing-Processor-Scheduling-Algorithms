@@ -554,7 +554,7 @@ def sjf_prem(process_d,process_t):
             flag2 = 0
             for j in range(i+1,len(time)):
  
-                if ((val[i]+time[i]-time[j] ss>val[j]) and ((val[i]+time[i])>time[j])) :
+                if ((val[i]+time[i]-time[j]>val[j]) and ((val[i]+time[i])>time[j])) :
                     if time[i]>curr_time:
                         curr_time=time[i]
  
