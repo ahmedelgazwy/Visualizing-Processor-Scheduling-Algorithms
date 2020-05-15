@@ -535,7 +535,6 @@ def sjf_non_prem(process_d, process_a):
     curr_time = float(list(ArrivalSorted.values())[0])
 
     flag = 1
-    print(BurstSorted)
     while flag == 1:
         flag = 0
 
